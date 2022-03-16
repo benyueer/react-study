@@ -3,7 +3,10 @@ interface IAction {
   payload: any
 }
 
-export default function createStore(reducer: Function) {
+export default function createStore(reducer: Function, enhancer: Function) {
+  if (enhancer) {
+    return enhancer(createStore)(reducer)
+  }
 
   let currentState: any = null
   let currentListeners: Function[] = []

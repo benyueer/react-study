@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-pascal-case */
-import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+// import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import { BroeserRouter as Router, Route, Link } from './ReactRouterDom'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import _404 from './pages/_404'
@@ -14,7 +15,7 @@ function App() {
         <Link to="/login">登录</Link>
         <Link to="/product/123">商品</Link>
 
-        <Switch>
+        {/* <Switch> */}
           <Route 
             exact 
             path="/" 
@@ -25,7 +26,7 @@ function App() {
           <Route path="/user" component={UserPage} />
           <Route path="/login" component={LoginPage} />
           <Route component={_404} />
-        </Switch>
+        {/* </Switch> */}
 
       </Router>
     </div>

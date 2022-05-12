@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { matchPath } from 'react-router-dom'
 import { RouterContext } from './RouterContext'
 
 export default class Route extends Component {
@@ -7,13 +8,28 @@ export default class Route extends Component {
       {
         context => {
           const { location } = context
-          const { path, component } = this.props
-          const match = location.pathname === path
+          console.log(location)
+          const { path, component, children, render, computedMatch } = this.props
+          const match = computedMatch ? computedMatch : path ? matchPath(location.pathname, this.props) : context.match
           const props = {
-            ...location,
+            ...context,
             match
           }
-          return match ? React.createElement(component) : null
+          return <RouterContext.Provider value={props}>
+            {
+              match
+                ? children
+                  ? typeof children === 'function'
+                    ? children(props)
+                    : children
+                  : component
+                    ? React.createElement(component, props)
+                    : render
+                      ? render(props)
+                      : null
+                : null
+            }
+          </RouterContext.Provider>
         }
       }
     </RouterContext.Consumer>

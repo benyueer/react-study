@@ -17,7 +17,17 @@ function createNode(vNode) {
     node = updateHostComponent(vNode)
   } else if (typeof type === 'function') {
     node = type.prototype.isReactComponent ? updateClassComponent(vNode) : updateFunctionComponent(vNode)
+  } else {
+    node = updateFragment(vNode)
   }
+  return node
+}
+
+// Fragment
+function updateFragment(vNode) {
+  const {props} = vNode
+  const node = document.createDocumentFragment()
+  reconcileChildren(props.children, node)
   return node
 }
 

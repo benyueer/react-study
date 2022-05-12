@@ -1,6 +1,6 @@
-/* eslint-disable react/jsx-pascal-case */
-// import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
-import { BroeserRouter as Router, Route, Link } from './ReactRouterDom'
+
+// import { BrowserRouter as Router, Route, Link, Switch, useRouteMatch, withRouter } from 'react-router-dom'
+import { BroeserRouter as Router, Route, Link, Switch, useRouteMatch } from './ReactRouterDom'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import _404 from './pages/_404'
@@ -15,7 +15,7 @@ function App() {
         <Link to="/login">登录</Link>
         <Link to="/product/123">商品</Link>
 
-        {/* <Switch> */}
+        <Switch>
           <Route 
             exact 
             path="/" 
@@ -25,10 +25,31 @@ function App() {
           />
           <Route path="/user" component={UserPage} />
           <Route path="/login" component={LoginPage} />
+          <Route path="/product/:id" render={() => <Product />} />
           <Route component={_404} />
-        {/* </Switch> */}
+        </Switch>
 
       </Router>
+    </div>
+  )
+}
+
+function Product() {
+  const {url, params} = useRouteMatch()
+
+  return (
+    <div>
+      product {params.id}
+      <Link to={url + "/detail"}>detail</Link>
+      <Route path={url + '/detail'} render={() => <Detail />} />
+    </div>
+  )
+}
+
+function Detail() {
+  return (
+    <div>
+      detail
     </div>
   )
 }

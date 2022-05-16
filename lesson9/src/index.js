@@ -1,11 +1,19 @@
-// import React, {Component} from 'react';
+// import React, {Component, useState } from 'react'
 import Component from './kreact/Component'
-import ReactDOM from './kreact/react-dom';
+import ReactDOM, { useState } from './kreact/react-dom'
 // import ReactDOM from 'react-dom';
 
 
-function FunctionComponent (props) {
-  return <div>{props.name}</div>
+function FunctionComponent(props) {
+  const [state, setState] = useState(0)
+  const click = () => {
+    setState(state + 1)
+    console.log('click', state)
+  }
+  return <div>
+    <p>{props.name}</p>
+    <button onClick={click}>{state + ''}</button>
+  </div>
 }
 
 class ClassComponent extends Component {
@@ -29,4 +37,4 @@ const jsx = (
     </> */}
   </div>
 )
-ReactDOM.render(jsx, document.getElementById('root'));
+ReactDOM.render(jsx, document.getElementById('root'))

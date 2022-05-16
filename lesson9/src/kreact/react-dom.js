@@ -38,8 +38,13 @@ function updateClassComponent(workInProgress) {
 
 // 函数组件
 function updateFunctionComponent(workInProgress) {
+
+  wipFiber = workInProgress
+  wipFiber.hooks = []
+  wipFiber.hookIndex = 0
+
   const { type, props } = workInProgress
-  console.log(type, props)
+  // console.log(type, props)
 
   const children = type(props)
 
@@ -64,6 +69,10 @@ function updateNode(node, nextVal) {
           node.appendChild(document.createTextNode('' + nextVal[key]))
         }
       } else {
+        if (key.startsWith('on')) {
+          const eventName = key.toLowerCase().substring(2)
+          node.addEventListener(eventName, nextVal[key])
+        }
         node[key] = nextVal[key]
       }
     })
@@ -76,16 +85,28 @@ function reconcileChildren(workInProgress, children) {
 
   let previousNewFiber = null
   const newChildren = Array.isArray(children) ? children : [children]
+  const oldFiber = workInProgress.base?.child
   for (let i = 0; i < newChildren.length; i++) {
     const child = newChildren[i]
+    const same = oldFiber && child && oldFiber.type === child.type
     let newFiber = null
-    newFiber = {
-      type: child.type,
-      props: child.props,
-      child: null,
-      sibling: null,
-      return: workInProgress,
-      stateNode: null
+
+    if (same) {
+      // 复用
+      newFiber = {
+        type: child.type,
+        props: child.props,
+        child: null,
+        sibling: null,
+        return: workInProgress,
+        stateNode: null,
+        base: oldFiber
+      }
+    }
+
+    if (!same && child) {
+      // 新增
+      
     }
 
     if (i === 0) {
@@ -108,10 +129,10 @@ function reconcileChildren(workInProgress, children) {
  */
 
 function preformUnitOfWork(workInProgress) {
-  console.log(workInProgress)
+  // console.log(workInProgress)
   // * step1: run current Fiber
   const { type } = workInProgress
-  console.log(type)
+  // console.log(type)
   if (typeof type === 'function') {
     type.prototype.isReactComponent
       ? updateClassComponent(workInProgress)
@@ -156,11 +177,17 @@ function workLoop(IdleDeadline) {
     // commit
     commitRoot()
   }
+
+  requestIdleCallback(workLoop)
+
 }
 
+let currentRoot = null
+
 function commitRoot() {
-  console.log(wipRoot.child)
+  // console.log(wipRoot.child)
   commitWork(wipRoot.child)
+  currentRoot = wipRoot
   wipRoot = null
 }
 
@@ -185,6 +212,44 @@ function commitWork(workInProgress) {
 }
 
 requestIdleCallback(workLoop)
+
+// 当前正在工作的Fiber
+let wipFiber = null
+// state  存储状态
+// queue
+
+export function useState(init) {
+  const oldHook = wipFiber?.base?.hooks[wipFiber.hookIndex]
+  const hook = oldHook ? {
+    state: oldHook.state,
+    queue: oldHook.queue
+  } : { state: init, queue: [] }
+
+
+  hook.queue.forEach(action => {
+    console.log('flash', action)
+    hook.state = action
+  })
+
+  const setState = (action) => {
+
+    console.log('action', action)
+    hook.queue.push(action)
+    
+    wipFiber = {
+      stateNode: currentRoot.stateNode,
+      props: currentRoot.props,
+      base: currentRoot
+    }
+    nextUnitOfWork = (wipFiber)
+  }
+
+  wipFiber.hooks.push(hook)
+  wipFiber.hookIndex++
+
+  return [hook.state, setState]
+}
+
 
 const reactDom = { render }
 export default reactDom

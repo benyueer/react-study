@@ -5,3 +5,7 @@
 .dark {
   background-color: black;
 }
+
+div {
+  border: 1px solid #567
+}

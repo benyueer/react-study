@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import StringRef from './StringRef'
 import CallbackRef from './CallbackRef'
 import './style.css'
+import CreateRef from './CreateRef'
+import HookUseRef from './HookUseRef'
+import ForwardRef from './ForwardRef'
 
 /**
  * string类型ref，存在效率问题
@@ -17,6 +20,9 @@ export default class RefView extends Component {
         <div>RefView</div>
         <StringRef />
         <CallbackRef />
+        <CreateRef />
+        <HookUseRef />
+        <ForwardRef />
       </>
     )
   }

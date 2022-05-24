@@ -37,7 +37,7 @@ export const routes = [
   },
   {
     path: '/RenderProps',
-    component: React.lazy(() => import('../Lazy/index')),
+    component: React.lazy(() => import('../RenderProps/index')),
     mate: {
       title: 'RenderProps'
     }

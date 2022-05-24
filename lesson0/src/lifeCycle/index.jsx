@@ -45,6 +45,7 @@ export default class LifeCycleView extends Component {
 
   getSnapshotBeforeUpdate(prevProps, prevState) {
     console.log('getSnapshotBeforeUpdate', prevProps, prevState)
+    return null
   }
 
   componentDidUpdate() {
@@ -114,6 +115,7 @@ class Child extends Component {
 
   getSnapshotBeforeUpdate(prevProps, prevState) {
     console.log('getSnapshotBeforeUpdate------child', prevProps, prevState)
+    return null
   }
 
   componentDidUpdate() {

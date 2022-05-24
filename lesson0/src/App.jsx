@@ -1,38 +1,41 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import React, { Suspense } from 'react'
+import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
 import { routes } from './router'
-import styles from './styles.module.less'
+import styles from './styles.module.scss'
 
 
 export default function App() {
-  console.log(styles)
   return (
     <>
       <div>app</div>
-      <BrowserRouter>
-        {
-          routes.map((route, index) => (
-            <div className={styles.menuItem}>
-              <Link
-                to={route.path}
-                key={route.path}
-              >{route.mate.title}</Link>
-            </div>
-          ))
-        }
-        <Routes>
+      <Suspense fallback={<div>loading</div>}>
+        <BrowserRouter>
           {
-            routes.map(route => (
-              <Route
+            routes.map((route, index) => (
+              <div
                 key={route.path}
-                path={route.path}
-                element={route.component}
+                className={styles.menuItem}
               >
-              </Route>
+                <Link
+                  to={route.path}
+                >{route.mate.title}</Link>
+              </div>
             ))
           }
-        </Routes>
-      </BrowserRouter>
+          <Switch>
+            {
+              routes.map(route => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  component={route.component}
+                >
+                </Route>
+              ))
+            }
+          </Switch>
+        </BrowserRouter>
+      </Suspense>
     </>
   )
 }

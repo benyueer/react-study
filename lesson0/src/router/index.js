@@ -42,4 +42,34 @@ export const routes = [
       title: 'RenderProps'
     }
   },
+  {
+    path: '/hooks',
+    component: React.lazy(() => import('../hooks/index')),
+    mate: {
+      title: 'hooks'
+    },
+    children: [
+      {
+        path: '/hooks/state',
+        component: React.lazy(() => import('../hooks/State')),
+        mate: {
+          title: 'state'
+        }
+      },
+      {
+        path: '/hooks/effect',
+        component: React.lazy(() => import('../hooks/Effect/index')),
+        mate: {
+          title: 'effect'
+        }
+      },
+      {
+        path: '/hooks/ref',
+        component: React.lazy(() => import('../hooks/Ref')),
+        mate: {
+          title: 'ref'
+        }
+      }
+    ]
+  }
 ]

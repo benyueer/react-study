@@ -1,12 +1,12 @@
-import React, { Suspense, lazy, startTransition } from 'react'
+import React, { Suspense, lazy } from 'react'
 
 export default function LazyView() {
   const [tab, setTab] = React.useState('A')
 
   const handleTabChange = (tab) => {
-    startTransition(() =>
+    // startTransition(() =>
       setTab(tab)
-    )
+    // )
   }
 
   return (

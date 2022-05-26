@@ -69,6 +69,13 @@ export const routes = [
         mate: {
           title: 'ref'
         }
+      },
+      {
+        path: '/hooks/callback',
+        component: React.lazy(() => import('../hooks/Callback')),
+        mate: {
+          title: 'Callback'
+        }
       }
     ]
   }

@@ -1,3 +1,5 @@
+import { DELETION, PLACEMENT, UPDATE } from "./const"
+
 function render(vNode, container) {
   wipRoot = {
     stateNode: container,
@@ -5,7 +7,10 @@ function render(vNode, container) {
   }
 
   nextUnitOfWork = wipRoot
+  deletions = []
 }
+
+let deletions = []
 
 function createNode(workInProgress) {
   let node = null
@@ -16,7 +21,7 @@ function createNode(workInProgress) {
     node = document.createElement(type)
   }
 
-  updateNode(node, props)
+  updateNode(node, {}, props)
   return node
 }
 
@@ -61,12 +66,33 @@ function updateHostComponent(workInProgress) {
 
 }
 
-function updateNode(node, nextVal) {
+function updateNode(node, preVal, nextVal) {
+  // console.log(preVal, nextVal)
+  Object.keys(preVal)
+    .forEach(key => {
+      if (key === 'children') {
+        if (typeof preVal[key] === 'string') {
+          node.innerHTML = ''
+        }
+      } else {
+        if (key.startsWith('on')) {
+          const eventName = key.toLowerCase().substring(2)
+          node.removeEventListener(eventName, preVal[key])
+        } else {
+          if (! (key in nextVal)) {
+            node[key] = ''
+          }
+        }
+      }
+    })
+
   Object.keys(nextVal)
     .forEach(key => {
       if (key === 'children') {
         if (typeof nextVal[key] === 'string') {
-          node.appendChild(document.createTextNode('' + nextVal[key]))
+          console.log('child', nextVal[key])
+          node.innerHTML = nextVal[key]
+          console.log(node)
         }
       } else {
         if (key.startsWith('on')) {
@@ -85,7 +111,7 @@ function reconcileChildren(workInProgress, children) {
 
   let previousNewFiber = null
   const newChildren = Array.isArray(children) ? children : [children]
-  const oldFiber = workInProgress.base?.child
+  let oldFiber = workInProgress.base?.child
   for (let i = 0; i < newChildren.length; i++) {
     const child = newChildren[i]
     const same = oldFiber && child && oldFiber.type === child.type
@@ -95,18 +121,38 @@ function reconcileChildren(workInProgress, children) {
       // 复用
       newFiber = {
         type: child.type,
-        props: child.props,
+        props: {...child.props},
         child: null,
         sibling: null,
         return: workInProgress,
-        stateNode: null,
-        base: oldFiber
+        stateNode: oldFiber.stateNode,
+        base: oldFiber,
+        effectTag: UPDATE
       }
     }
 
     if (!same && child) {
       // 新增
-      
+      newFiber = {
+        type: child.type,
+        props: {...child.props},
+        child: null,
+        sibling: null,
+        return: workInProgress,
+        stateNode: null,
+        base: null,
+        effectTag: PLACEMENT
+      }
+    }
+
+    if (!same && oldFiber) {
+      // delete
+      oldFiber.effectTag = DELETION
+      deletions.push(oldFiber)
+    }
+
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling
     }
 
     if (i === 0) {
@@ -185,7 +231,8 @@ function workLoop(IdleDeadline) {
 let currentRoot = null
 
 function commitRoot() {
-  // console.log(wipRoot.child)
+  console.log(wipRoot.child)
+  deletions.forEach(commitWork)
   commitWork(wipRoot.child)
   currentRoot = wipRoot
   wipRoot = null
@@ -201,14 +248,36 @@ function commitWork(workInProgress) {
   while (!parentNodeFiber.stateNode) {
     parentNodeFiber = parentNodeFiber.return
   }
+
   const parentNode = parentNodeFiber.stateNode
-  if (workInProgress.stateNode) {
+  if (workInProgress.stateNode && workInProgress.effectTag === PLACEMENT) {
     parentNode.appendChild(workInProgress.stateNode)
+  } else if (workInProgress.stateNode && workInProgress.effectTag === UPDATE) {
+    updateNode(
+      workInProgress.stateNode,
+      workInProgress.base.props,
+      workInProgress.props
+    )
+  } else if(
+    workInProgress.effectTag == DELETION &&
+    workInProgress.stateNode
+  ) {
+    commitDeletion(workInProgress, parentNode)
   }
+
+
   // * step2 commit workInProgress.child
   commitWork(workInProgress.child)
   // * step3 commit workInprogress.sibling
   commitWork(workInProgress.sibling)
+}
+
+function commitDeletion(workInProgress, parentNode) {
+  if (workInProgress.stateNode) {
+    parentNode.removeChild(workInProgress.stateNode)
+  } else {
+    commitDeletion(workInProgress.child, parentNode)
+  }
 }
 
 requestIdleCallback(workLoop)
@@ -220,6 +289,7 @@ let wipFiber = null
 
 export function useState(init) {
   const oldHook = wipFiber?.base?.hooks[wipFiber.hookIndex]
+  console.log(oldHook)
   const hook = oldHook ? {
     state: oldHook.state,
     queue: oldHook.queue
@@ -236,16 +306,19 @@ export function useState(init) {
     console.log('action', action)
     hook.queue.push(action)
     
-    wipFiber = {
+    wipRoot = {
       stateNode: currentRoot.stateNode,
       props: currentRoot.props,
       base: currentRoot
     }
-    nextUnitOfWork = (wipFiber)
+    nextUnitOfWork = wipRoot
+    deletions = []
   }
 
   wipFiber.hooks.push(hook)
   wipFiber.hookIndex++
+
+  console.log(hook.state)
 
   return [hook.state, setState]
 }

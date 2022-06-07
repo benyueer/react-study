@@ -5,7 +5,15 @@ export default class RenderPropsView extends Component {
     return (
       <>
         <div>RenderPropsView</div>
-        <Mouse render={(data) => <Cat {...data} />} />
+        <Mouse render={(data) => <Cat {...data} />} >
+          {/* <div>children</div> */}
+          {/* {
+            () => <div>child</div>
+          } */}
+          {{
+            default: () => <div>child</div>
+          }}
+        </Mouse>
       </>
     )
   }
@@ -23,6 +31,7 @@ class Mouse extends Component {
     })    
   }
   render() {
+    console.log(this.props)
     return (
       <>
         <p>move</p>

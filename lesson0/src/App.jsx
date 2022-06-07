@@ -2,6 +2,7 @@ import React, { Suspense } from 'react'
 import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
 import { routes } from './router'
 import styles from './styles.module.scss'
+console.log(styles)
 
 
 export default function App() {

@@ -1,6 +1,9 @@
 import { DELETION, PLACEMENT, UPDATE } from "./const"
 
+// reactDOM.render
 function render(vNode, container) {
+  console.log(vNode)
+  // 构建根Fiber
   wipRoot = {
     stateNode: container,
     props: { children: vNode }
@@ -10,6 +13,7 @@ function render(vNode, container) {
   deletions = []
 }
 
+// 需要删除的节点
 let deletions = []
 
 function createNode(workInProgress) {
@@ -36,7 +40,9 @@ function updateFragment(vNode) {
 // 类组件
 function updateClassComponent(workInProgress) {
   const { type, props } = workInProgress
+  // 创建组件
   const instance = new type(props)
+  // 获取 VNODE
   const children = instance.render()
   reconcileChildren(workInProgress, children)
 }
@@ -90,9 +96,7 @@ function updateNode(node, preVal, nextVal) {
     .forEach(key => {
       if (key === 'children') {
         if (typeof nextVal[key] === 'string') {
-          console.log('child', nextVal[key])
           node.innerHTML = nextVal[key]
-          console.log(node)
         }
       } else {
         if (key.startsWith('on')) {
@@ -105,16 +109,22 @@ function updateNode(node, preVal, nextVal) {
 }
 
 function reconcileChildren(workInProgress, children) {
+  // 文本节点不做处理
   if ((workInProgress.props && typeof workInProgress.props.children === 'string')) {
     return
   }
 
+  // 上一个节点
   let previousNewFiber = null
+  // children列表
   const newChildren = Array.isArray(children) ? children : [children]
+  // update阶段拿到旧的Fiber
   let oldFiber = workInProgress.base?.child
   for (let i = 0; i < newChildren.length; i++) {
     const child = newChildren[i]
+    // 判断节点是否可复用
     const same = oldFiber && child && oldFiber.type === child.type
+    
     let newFiber = null
 
     if (same) {
@@ -213,6 +223,7 @@ let nextUnitOfWork = null
 // wip work in progress 正在进行当中的
 let wipRoot = null
 
+
 function workLoop(IdleDeadline) {
   while (nextUnitOfWork && IdleDeadline.timeRemaining()) {
     // 执行当前Fiber，返回下一个Fiber
@@ -225,13 +236,12 @@ function workLoop(IdleDeadline) {
   }
 
   requestIdleCallback(workLoop)
-
 }
 
 let currentRoot = null
 
 function commitRoot() {
-  console.log(wipRoot.child)
+  console.log(wipRoot)
   deletions.forEach(commitWork)
   commitWork(wipRoot.child)
   currentRoot = wipRoot
@@ -280,6 +290,7 @@ function commitDeletion(workInProgress, parentNode) {
   }
 }
 
+// 执行更新
 requestIdleCallback(workLoop)
 
 // 当前正在工作的Fiber
@@ -289,7 +300,6 @@ let wipFiber = null
 
 export function useState(init) {
   const oldHook = wipFiber?.base?.hooks[wipFiber.hookIndex]
-  console.log(oldHook)
   const hook = oldHook ? {
     state: oldHook.state,
     queue: oldHook.queue
@@ -297,13 +307,11 @@ export function useState(init) {
 
 
   hook.queue.forEach(action => {
-    console.log('flash', action)
     hook.state = action
   })
 
   const setState = (action) => {
 
-    console.log('action', action)
     hook.queue.push(action)
     
     wipRoot = {
@@ -317,8 +325,6 @@ export function useState(init) {
 
   wipFiber.hooks.push(hook)
   wipFiber.hookIndex++
-
-  console.log(hook.state)
 
   return [hook.state, setState]
 }

@@ -1,10 +1,10 @@
 
-// import { BrowserRouter as Router, Route, Link, Switch, useRouteMatch, withRouter } from 'react-router-dom'
-import { BroeserRouter as Router, Route, Link, Switch, useRouteMatch } from './ReactRouterDom'
+import { BrowserRouter as Router, Route, Link, Switch, useRouteMatch, withRouter } from 'react-router-dom'
+// import { BroeserRouter as Router, Route, Link, Switch, useRouteMatch } from './ReactRouterDom'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import _404 from './pages/_404'
-import UserPage from './pages/UserPage'
+import UserPage from './pages/user/UserPage'
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
             render={() => <div>rander</div>}
             component={HomePage} 
           />
-          <Route path="/user" component={UserPage} />
+          <Route path="/user" render={() => <UserPage />} />
           <Route path="/login" component={LoginPage} />
           <Route path="/product/:id" render={() => <Product />} />
           <Route component={_404} />

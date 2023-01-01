@@ -522,6 +522,10 @@ function updateHostComponent(
   return workInProgress.child;
 }
 ```
+
+#### 流程图
+<img src="./imgs/render1.drawio.png" />
+
 ### 回溯阶段 completeWork
 `completeUnitOfWork(unitOfWork)`, 处理 `beginWork` 阶段已经创建出来的 `fiber` 节点, 核心逻辑:
 1. 调用`completeWork`

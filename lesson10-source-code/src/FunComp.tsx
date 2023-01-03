@@ -5,7 +5,12 @@ export default function FunComp() {
   return (
     <div>
       <p>FunComp</p>
-      <span onClick={() => setCount(count+1)}>{count}</span>
+      <span onClick={() => {
+
+        debugger
+        setCount(count + 1)
+      }
+      }>{count}</span>
     </div>
   )
 }

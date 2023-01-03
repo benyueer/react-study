@@ -107,3 +107,35 @@ function commitRootImpl(root, renderPriorityLevel) {
   return null;
 }
 ```
+`commitRootImpl`函数中, 可以根据是否调用渲染, 把整个`commitRootImpl`分为 3 段(分别是**渲染前**, **渲染**, **渲染**后).
+
+#### 渲染前
+为接下来正式渲染, 做一些准备工作. 主要包括:
+1. 设置全局状态(如: 更新`fiberRoot`上的属性)
+2. 重置全局变量(如: `workInProgressRoot`, `workInProgress`等)
+3. 再次更新副作用队列: 只针对根节点`fiberRoot.finishedWork`
+   - 默认情况下根节点的副作用队列是不包括自身的, 如果根节点有副作用, 则将根节点添加到副作用队列的末尾
+   - 注意只是延长了副作用队列, 但是`fiberRoot.lastEffect`指针并没有改变.
+
+
+#### 渲染
+`commitRootImpl`函数中, 渲染阶段的主要逻辑是处理副作用队列, 将最新的 `DOM` 节点(已经在内存中, 只是还没渲染)渲染到界面上.
+整个渲染过程被分为 3 个函数分布实现:
+1. `commitBeforeMutationEffects`
+   - `dom` 变更之前, 处理副作用队列中带有`Snapshot,Passive`标记的`fiber`节点
+2. `commitMutationEffects`
+   - `dom` 变更, 界面得到更新. 处理副作用队列中带有`Placement, Update, Deletion, Hydrating`标记的`fiber`节点
+3. `commitLayoutEffects`
+   - `dom` 变更后, 处理副作用队列中带有`Update | Callback`标记的`fiber`节点
+
+通过上述源码分析, 可以把`commitRootImpl`的职责概括为 2 个方面:
+1. 处理副作用队列. (步骤 1,2,3 都会处理, 只是处理节点的标识`fiber.flags`不同).
+2. 调用渲染器, 输出最终结果. (在步骤 2: `commitMutationEffects`中执行).
+
+所以`commitRootImpl`是处理`fiberRoot.finishedWork`这棵即将被渲染的`fiber`树, 理论上无需关心这棵`fiber`树是如何产生的(可以是首次构造产生, 也可以是对比更新产生)
+这 3 个函数处理的对象是`副作用队列`和`DOM对象`
+
+所以无论`fiber`树结构有多么复杂, 到了`commitRoot`阶段, 实际起作用的只有 2 个节点:
+- 副作用队列所在节点: `根节点`, 即`HostRootFiber`节点.
+- `DOM`对象所在节点: 从上至下首个`HostComponent`类型的`fiber`节点, 此节点 `fiber.stateNode`实际上指向最新的 `DOM` 树
+
